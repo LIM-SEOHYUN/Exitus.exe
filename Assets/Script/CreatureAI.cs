@@ -18,6 +18,15 @@ public class CreatureAI : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Collider2D myCollider;
 
+    void Awake()
+    {
+        if (cutsceneUI == null)
+            cutsceneUI = GameObject.Find("CutsceneUI");
+
+        if (videoPlayer == null)
+            videoPlayer = FindObjectOfType<VideoPlayer>();
+    }
+
     void Start()
     {
         animator = GetComponent<Animator>();

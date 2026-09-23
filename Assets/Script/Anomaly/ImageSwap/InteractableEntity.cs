@@ -12,32 +12,32 @@ public class InteractableEntity : MonoBehaviour
     public Sprite interactionTestSprite;
 
 
-    // 처음 가지고 있던 정상 이미지
+    // 원래 정상 이미지
     private Sprite originalSprite;
 
-    // 이상현상 발동 시 바뀔 이미지
+    // 실제 이상현상으로 바뀔 이미지
     private Sprite anomalySwapSprite;
 
-    // 이미지 교체 확률
+    // 실제 이상현상의 이미지 변경 확률
     private float anomalySwapChance = 1f;
 
-    // 현재 이미지 스왑 이상현상이 활성화되어 있는지
+    // 실제 이미지 스왑 이상현상이 발동된 상태인가?
     private bool imageSwapActive = false;
 
-    // 이미 이미지가 변경되었는지
+    // 이미 한 번 그림이 변경되었는가?
     private bool alreadySwapped = false;
 
 
     private void Awake()
     {
-        // Inspector에 Sprite Renderer를 직접 넣지 않았을 경우
-        // 현재 오브젝트에서 자동으로 찾음
+        // Inspector에서 SpriteRenderer가 연결되지 않았다면
+        // 자기 자신의 SpriteRenderer를 자동으로 찾음
         if (spriteRenderer == null)
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
         }
 
-        // 정상 상태의 원본 이미지를 저장
+        // 정상 그림 저장
         if (spriteRenderer != null)
         {
             originalSprite = spriteRenderer.sprite;
@@ -53,20 +53,14 @@ public class InteractableEntity : MonoBehaviour
 
 
     // =====================================================
-    // ImageSwapAnomaly가 발동했을 때 호출되는 함수
+    // 실제 ImageSwap 이상현상이 발동됐을 때 호출
     // =====================================================
     public void ActivateImageSwap(Sprite swapSprite, float swapChance)
     {
-        // 바뀔 이미지 저장
         anomalySwapSprite = swapSprite;
-
-        // 확률 저장
         anomalySwapChance = Mathf.Clamp01(swapChance);
 
-        // 이제 이 오브젝트에서 이미지 스왑을 할 수 있음
         imageSwapActive = true;
-
-        // 아직 변경되지 않은 상태로 설정
         alreadySwapped = false;
 
         Debug.Log(
@@ -77,43 +71,64 @@ public class InteractableEntity : MonoBehaviour
 
 
     // =====================================================
-    // 현재 플레이어가 이 오브젝트와
-    // 상호작용할 수 있는 상태인지 확인
+    // Player가 E키로 상호작용할 수 있는지 확인
+    //
+    // 1. 실제 이상현상이 활성화된 경우
+    // 또는
+    // 2. Interaction Test Sprite가 설정된 경우
+    //
+    // 둘 중 하나면 E 상호작용 가능
     // =====================================================
     public bool CanInteract()
+    {
+        if (alreadySwapped)
+        {
+            return false;
+        }
+
+        if (imageSwapActive)
+        {
+            return true;
+        }
+
+        // 예전에 사용하던 테스트 방식도 유지
+        if (interactionTestSprite != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    // =====================================================
+    // [E] 표시를 띄워도 되는 상태인지 확인
+    //
+    // 중요:
+    // Test Sprite가 있다고 [E]를 띄우는 게 아니라
+    // 실제 이상현상이 발동한 경우에만 true
+    // =====================================================
+    public bool ShouldShowPrompt()
     {
         return imageSwapActive && !alreadySwapped;
     }
 
 
     // =====================================================
-    // PlayerInteraction에서 E키를 눌렀을 때 호출
+    // Player가 E키를 눌렀을 때 호출
     // =====================================================
     public void Interact()
     {
-        // 이상현상이 활성화되지 않았다면 아무것도 하지 않음
-        if (!imageSwapActive)
-        {
-            Debug.Log(
-                "[InteractableEntity] 현재 활성화된 이미지 스왑 이상현상이 없습니다: "
-                + entityId
-            );
-
-            return;
-        }
-
-        // 이미 한 번 이미지가 바뀌었다면 다시 실행하지 않음
         if (alreadySwapped)
         {
             Debug.Log(
-                "[InteractableEntity] 이미 이미지가 변경된 대상입니다: "
+                "[InteractableEntity] 이미 그림이 변경되었습니다: "
                 + entityId
             );
 
             return;
         }
 
-        // SpriteRenderer 확인
         if (spriteRenderer == null)
         {
             Debug.LogWarning(
@@ -124,11 +139,36 @@ public class InteractableEntity : MonoBehaviour
             return;
         }
 
-        // 바뀔 이미지 확인
-        if (anomalySwapSprite == null)
+
+        Sprite spriteToUse = null;
+        float chanceToUse = 1f;
+
+
+        // -------------------------------------------------
+        // 실제 이상현상이 발동한 경우
+        // -------------------------------------------------
+        if (imageSwapActive)
         {
-            Debug.LogWarning(
-                "[InteractableEntity] 교체할 Sprite가 설정되지 않았습니다: "
+            spriteToUse = anomalySwapSprite;
+            chanceToUse = anomalySwapChance;
+        }
+
+        // -------------------------------------------------
+        // 실제 이상현상이 발동하지 않았지만
+        // 테스트용 Sprite가 있는 경우
+        //
+        // 예전에 E를 누르면 그림이 바뀌던 동작을 살리는 부분
+        // -------------------------------------------------
+        else if (interactionTestSprite != null)
+        {
+            spriteToUse = interactionTestSprite;
+            chanceToUse = 1f;
+        }
+
+        else
+        {
+            Debug.Log(
+                "[InteractableEntity] 현재 상호작용할 이미지가 없습니다: "
                 + entityId
             );
 
@@ -136,13 +176,25 @@ public class InteractableEntity : MonoBehaviour
         }
 
 
-        // =================================================
-        // 이미지 변경 확률 판정
-        // =================================================
+        // 교체할 이미지가 없는 경우
+        if (spriteToUse == null)
+        {
+            Debug.LogWarning(
+                "[InteractableEntity] 교체할 Sprite가 없습니다: "
+                + entityId
+            );
+
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // 확률 판정
+        // -------------------------------------------------
 
         float randomValue = Random.value;
 
-        if (randomValue > anomalySwapChance)
+        if (randomValue > chanceToUse)
         {
             Debug.Log(
                 "[InteractableEntity] 이미지 교체 확률 판정 실패: "
@@ -153,15 +205,13 @@ public class InteractableEntity : MonoBehaviour
         }
 
 
-        // =================================================
+        // -------------------------------------------------
         // 실제 이미지 변경
-        // =================================================
+        // -------------------------------------------------
 
-        spriteRenderer.sprite = anomalySwapSprite;
+        spriteRenderer.sprite = spriteToUse;
 
         alreadySwapped = true;
-
-        // 이상현상 처리가 끝났으므로 비활성화
         imageSwapActive = false;
 
 
@@ -171,53 +221,41 @@ public class InteractableEntity : MonoBehaviour
         );
 
 
-        // =================================================
-        // [E] 표시 제거
-        // =================================================
+        // -------------------------------------------------
+        // 이미지 변경 후 [E] 표시 즉시 숨기기
+        // -------------------------------------------------
 
         ImageSwapPrompt prompt =
             GetComponent<ImageSwapPrompt>();
 
         if (prompt != null)
         {
-            prompt.DisablePrompt();
+            prompt.HidePromptImmediately();
         }
     }
 
 
     // =====================================================
-    // 원래 이미지로 되돌리는 함수
-    // 필요할 경우 다른 시스템에서 호출 가능
+    // 원래 이미지로 되돌리기
     // =====================================================
     public void RestoreOriginalImage()
     {
-        if (spriteRenderer == null)
+        if (spriteRenderer != null && originalSprite != null)
         {
-            return;
+            spriteRenderer.sprite = originalSprite;
         }
 
-        if (originalSprite == null)
-        {
-            return;
-        }
-
-        // 원래 이미지 복구
-        spriteRenderer.sprite = originalSprite;
-
-        // 상태 초기화
         imageSwapActive = false;
         alreadySwapped = false;
-
         anomalySwapSprite = null;
 
 
-        // E 표시도 제거
         ImageSwapPrompt prompt =
             GetComponent<ImageSwapPrompt>();
 
         if (prompt != null)
         {
-            prompt.DisablePrompt();
+            prompt.HidePromptImmediately();
         }
 
 

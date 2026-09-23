@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class GameManager : MonoBehaviour
 
     public Image fadePanel;
     public float fadeDuration = 0.5f;
+    public bool canMove = true;
     public TMPro.TMP_Text resultText;
 
     private void MovePlayerToSpawn()
@@ -82,7 +84,7 @@ public class GameManager : MonoBehaviour
         if (successCount >= 8)
         {
             Debug.Log("게임 클리어!");
-            yield return StartCoroutine(FadeIn());
+            SceneManager.LoadScene("ClearScene");
             yield break;
         }
 
@@ -136,6 +138,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator FadeOut()
     {
+        canMove = false;
+
         float time = 0f;
 
         Color color = fadePanel.color;
@@ -172,5 +176,7 @@ public class GameManager : MonoBehaviour
 
         color.a = 0f;
         fadePanel.color = color;
+
+        canMove = true;
     }
 }

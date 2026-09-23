@@ -2,28 +2,42 @@ using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
-    public Transform player;          // «√∑π¿ÃæÓ Transform
-    public float openDistance = 0.1f;   // ø≠∏Æ¥¬ ∞≈∏Æ
+    public Transform player;
+    public float openDistance = 0.1f;
     public Animator animator;
+
+    [Header("Door Sound Override")]
+    [Tooltip("ÎπÑÏõåÎëêÎ©¥ Î∂ÄÎ™® doorÏùò DoorSoundBankÎ•º ÏÇ¨Ïö©Ìï©ÎãàÎã§.")]
+    public AudioClip doorOpenClip;
+    public AudioClip doorCloseClip;
+    public float doorSoundVolume = 1f;
+
     private Collider2D doorCollider;
+    private AudioSource localAudioSource;
+    private DoorSoundBank parentSoundBank;
     private bool isOpen = false;
 
     void Start()
     {
         animator = GetComponent<Animator>();
         doorCollider = GetComponent<Collider2D>();
+        parentSoundBank = GetComponentInParent<DoorSoundBank>();
+
         isOpen = false;
     }
 
     void Update()
     {
+        if (player == null)
+            return;
+
         float distance = Vector2.Distance(player.position, transform.position);
 
         if (!isOpen && distance <= openDistance)
         {
             OpenDoor();
         }
-        else if (isOpen && distance > openDistance + 1f) // «√∑π¿ÃæÓ∞° ∏÷æÓ¡ˆ∏È ¥›»˚
+        else if (isOpen && distance > openDistance + 1f)
         {
             CloseDoor();
         }
@@ -32,14 +46,62 @@ public class DoorController : MonoBehaviour
     void OpenDoor()
     {
         isOpen = true;
-        animator.SetTrigger("Open");
-        doorCollider.enabled = false; // ≈Î∞˙ ∞°¥…
+
+        if (animator != null)
+            animator.SetTrigger("Open");
+
+        if (doorCollider != null)
+            doorCollider.enabled = false;
+
+        Debug.Log("[DoorController] " + gameObject.name + " Î¨∏ Ïó¥Î¶º");
+
+        if (doorOpenClip != null)
+        {
+            PlayLocalSound(doorOpenClip);
+        }
+        else if (parentSoundBank != null)
+        {
+            parentSoundBank.PlayOpen();
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[DoorController] " + gameObject.name +
+                ": Î∂ÄÎ™® DoorSoundBankÎ•º Ï∞æÏßÄ Î™ªÌñàÏäµÎãàÎã§."
+            );
+        }
     }
 
     void CloseDoor()
     {
         isOpen = false;
-        animator.SetTrigger("Close");
-        doorCollider.enabled = true; // ¥ŸΩ√ ∏∑»˚
+
+        if (animator != null)
+            animator.SetTrigger("Close");
+
+        if (doorCollider != null)
+            doorCollider.enabled = true;
+
+        if (doorCloseClip != null)
+        {
+            PlayLocalSound(doorCloseClip);
+        }
+        else if (parentSoundBank != null)
+        {
+            parentSoundBank.PlayClose();
+        }
+    }
+
+    void PlayLocalSound(AudioClip clip)
+    {
+        if (localAudioSource == null)
+        {
+            localAudioSource = gameObject.AddComponent<AudioSource>();
+            localAudioSource.playOnAwake = false;
+            localAudioSource.loop = false;
+            localAudioSource.spatialBlend = 0f;
+        }
+
+        localAudioSource.PlayOneShot(clip, doorSoundVolume);
     }
 }

@@ -28,6 +28,15 @@ public class MonsterChaseAnomaly : AnomalyBase
         // 몬스터 AI에 속도 전달
         CreatureAI ai = spawnedMonster.GetComponent<CreatureAI>();
         ai.moveSpeed = MyData.chaseSpeed;
+
+        // 한 프레임 기다렸다가 Activate 실행 (Start()가 먼저 돌도록 보장)
+        StartCoroutine(ActivateAfterFrame(ai));
+    }
+
+    // 코루틴: 한 프레임 대기 후 Activate 호출
+    private System.Collections.IEnumerator ActivateAfterFrame(CreatureAI ai)
+    {
+        yield return null; // 한 프레임 대기
         ai.Activate();
     }
 
