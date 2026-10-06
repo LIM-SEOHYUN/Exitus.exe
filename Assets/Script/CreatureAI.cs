@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.Video;
 
 public class CreatureAI : MonoBehaviour
 {
@@ -9,22 +8,24 @@ public class CreatureAI : MonoBehaviour
     public Transform player;
     public float fadeDuration = 1f;
 
-    public GameObject cutsceneUI; // UI 패널
-    public VideoPlayer videoPlayer; // VideoPlayer 연결
+    // UI 변수는 전부 삭제했습니다 (매니저가 관리하므로)
+
+    public AudioClip alertClip;
+    [Range(0f, 1f)] public float alertVolume = 0.8f;
 
     private bool isActive = false;
     private bool isAttacking = false;
     private Animator animator;
     private SpriteRenderer spriteRenderer;
     private Collider2D myCollider;
+    private AudioSource alertAudioSource;
 
     void Awake()
     {
-        if (cutsceneUI == null)
-            cutsceneUI = GameObject.Find("CutsceneUI");
-
-        if (videoPlayer == null)
-            videoPlayer = FindObjectOfType<VideoPlayer>();
+        alertAudioSource = gameObject.AddComponent<AudioSource>();
+        alertAudioSource.playOnAwake = false;
+        alertAudioSource.loop = false;
+        alertAudioSource.spatialBlend = 0f;
     }
 
     void Start()
@@ -44,9 +45,6 @@ public class CreatureAI : MonoBehaviour
         c.a = 0f;
         spriteRenderer.color = c;
 
-        if (cutsceneUI != null)
-            cutsceneUI.SetActive(false);
-
         // 기본적으로 충돌 꺼두기
         if (myCollider != null)
             myCollider.enabled = false;
@@ -64,6 +62,8 @@ public class CreatureAI : MonoBehaviour
     public void Activate()
     {
         isActive = true;
+        if (alertClip != null)
+            alertAudioSource.PlayOneShot(alertClip, alertVolume);
         if (myCollider != null)
             myCollider.enabled = true; // 활성화될 때만 충돌 켜기
         StartCoroutine(FadeIn());
@@ -108,6 +108,7 @@ public class CreatureAI : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log("충돌 감지: " + other.name);
         if (!isActive) return; // 활성화되지 않았으면 무시
 
         if (other.CompareTag("Player"))
@@ -122,23 +123,17 @@ public class CreatureAI : MonoBehaviour
 
     IEnumerator PlayCutscene()
     {
-        if (cutsceneUI != null)
-            cutsceneUI.SetActive(true);
-
-        if (videoPlayer != null)
-        {
-            Debug.Log("영상 재생 시작");
-            videoPlayer.Play();
-            // 영상 길이만큼 대기
-            yield return new WaitForSeconds((float)videoPlayer.length);
-            videoPlayer.Stop();
-        }
-
-        if (cutsceneUI != null)
-            cutsceneUI.SetActive(false);
-
         moveSpeed = 0f;
-        animator.SetBool("isWalking", false);
+        if (animator != null) animator.SetBool("isWalking", false);
+
+        if (CutsceneManager.Instance != null)
+        {
+            yield return StartCoroutine(CutsceneManager.Instance.PlayCutsceneRoutine());
+        }
+        else
+        {
+            Debug.LogError("씬에 CutsceneManager가 없습니다! 빈 오브젝트를 만들고 매니저 스크립트를 넣어주세요.");
+        }
 
         GameManager.Instance.Fail();
         Destroy(gameObject);

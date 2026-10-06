@@ -13,12 +13,12 @@ public class StageUI : MonoBehaviour
 
     public void UpdateStage(int stage)
     {
-        stageText.text = "STAGE 0" + stage;
+        stageText.text = "STAGE " + stage;
     }
 
     public void UpdateSuccess(int count)
     {
-        successText.text = "SUCCESS " + count + " / 8";  //추후 삭제
+        successText.text = "SUCCESS " + count + " / 8";  
 
         for (int i = 0; i < hearts.Length; i++)
         {

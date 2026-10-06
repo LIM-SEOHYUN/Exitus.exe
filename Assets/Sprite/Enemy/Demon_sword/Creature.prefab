@@ -104,6 +104,9 @@ MonoBehaviour:
   player: {fileID: 0}
   fadeDuration: 1
   cutsceneUI: {fileID: 0}
+  videoPlayer: {fileID: 0}
+  alertClip: {fileID: 8300000, guid: c55eea98e401e4e07b03ca2584c0923c, type: 3}
+  alertVolume: 0.253
 --- !u!95 &3944640907818980689
 Animator:
   serializedVersion: 5

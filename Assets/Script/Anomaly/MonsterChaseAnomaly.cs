@@ -29,6 +29,9 @@ public class MonsterChaseAnomaly : AnomalyBase
         CreatureAI ai = spawnedMonster.GetComponent<CreatureAI>();
         ai.moveSpeed = MyData.chaseSpeed;
 
+        // 컷씬 UI 주입 (씬에 있는 오브젝트 연결)
+        //ai.cutsceneUI = GameObject.Find("CreatureTriggerCutScene");
+
         // 한 프레임 기다렸다가 Activate 실행 (Start()가 먼저 돌도록 보장)
         StartCoroutine(ActivateAfterFrame(ai));
     }

@@ -5,6 +5,7 @@ public class PauseManager : MonoBehaviour
 {
     public GameObject pausePanel;
     public GameObject pauseOverlay;
+    public GameObject guidePanel;
 
 
     private bool isPaused = false;
@@ -36,6 +37,7 @@ public class PauseManager : MonoBehaviour
     {
         pausePanel.SetActive(false);
         pauseOverlay.SetActive(false);
+        guidePanel.SetActive(false);
         Time.timeScale = 1f;
         isPaused = false;
     }
@@ -48,6 +50,8 @@ public class PauseManager : MonoBehaviour
 
     public void GoToTitle()
     {
+        Debug.Log("GoToTitle 버튼 눌림!");
+        
         Time.timeScale = 1f;
         SceneManager.LoadScene("StartScene");
     }

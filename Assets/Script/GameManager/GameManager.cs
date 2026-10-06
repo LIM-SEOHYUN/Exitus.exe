@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public int currentStage = 1;
+    public int currentStage = 0;
     public int successCount = 0;
 
     public Transform spawnPoint;
@@ -21,6 +21,12 @@ public class GameManager : MonoBehaviour
     public bool canMove = true;
     public TMPro.TMP_Text resultText;
 
+    [Header("Result sounds")]
+    [SerializeField] private AudioClip successClip;
+    [SerializeField] private AudioClip failClip;
+    [SerializeField, Range(0f, 1f)] private float resultSoundVolume = 0.8f;
+    [SerializeField, Range(0f, 1f)] private float failSoundVolume = 0.3f;
+
     private void MovePlayerToSpawn()
     {
         player.position = spawnPoint.position;
@@ -29,7 +35,11 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         MovePlayerToSpawn();
-        AnomalyManager.Instance.DecideStageAnomaly();
+
+        if (currentStage > 0)
+        {
+            AnomalyManager.Instance.DecideStageAnomaly();
+        }
 
         stageUI.UpdateStage(currentStage);
         stageUI.UpdateSuccess(successCount);
@@ -44,6 +54,8 @@ public class GameManager : MonoBehaviour
 
     public void Success()
     {
+        Debug.Log("SUCCESS 호출 / 현재 스테이지: " + currentStage);
+
         if (successCount >= 8)
         {
             return;
@@ -56,12 +68,21 @@ public class GameManager : MonoBehaviour
         // 화면 암전
         yield return StartCoroutine(FadeOut());
 
-        resultText.text = "CORRECT";
-        resultText.gameObject.SetActive(true);
+        if (currentStage == 0)
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
 
-        yield return new WaitForSeconds(0.8f);
+        if (currentStage != 0)
+        {
+            resultText.text = "CORRECT";
+            resultText.gameObject.SetActive(true);
+            ButtonSFX.PlayClipFromListener(successClip, resultSoundVolume);
 
-        resultText.gameObject.SetActive(false);
+            yield return new WaitForSeconds(0.8f);
+
+            resultText.gameObject.SetActive(false);
+        }
 
         // 이상현상이 있는 스테이지를 정답 처리한 경우 도감 등록
         if (AnomalyManager.Instance.CurrentStageHasAnomaly)
@@ -76,6 +97,8 @@ public class GameManager : MonoBehaviour
         stageUI.UpdateSuccess(successCount);
 
         AnomalyManager.Instance.DecideStageAnomaly();
+
+        Debug.Log("현재 스테이지 " + currentStage + " / 이상현상 여부: " + AnomalyManager.Instance.CurrentStageHasAnomaly);
 
         MovePlayerToSpawn();
 
@@ -107,6 +130,7 @@ public class GameManager : MonoBehaviour
 
         resultText.text = "WRONG";
         resultText.gameObject.SetActive(true);
+        ButtonSFX.PlayClipFromListener(failClip, failSoundVolume);
 
         yield return new WaitForSeconds(0.8f);
         
@@ -124,6 +148,8 @@ public class GameManager : MonoBehaviour
 
         AnomalyManager.Instance.ResetUsedAnomalies();
         AnomalyManager.Instance.DecideStageAnomaly();
+
+        Debug.Log("현재 스테이지 " + currentStage + " / 이상현상 여부: " + AnomalyManager.Instance.CurrentStageHasAnomaly);
 
         MovePlayerToSpawn();
 
