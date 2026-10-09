@@ -8,8 +8,6 @@ public class CreatureAI : MonoBehaviour
     public Transform player;
     public float fadeDuration = 1f;
 
-    // UI 변수는 전부 삭제했습니다 (매니저가 관리하므로)
-
     public AudioClip alertClip;
     [Range(0f, 1f)] public float alertVolume = 0.8f;
 
