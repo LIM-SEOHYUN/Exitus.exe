@@ -14,4 +14,6 @@ public abstract class AnomalyBase : MonoBehaviour
     public abstract void Activate();
 
     public virtual bool IsResolved() => true;
+
+    public virtual void Deactivate() { }
 }

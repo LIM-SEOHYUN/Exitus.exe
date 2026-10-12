@@ -90,8 +90,14 @@ public class GameManager : MonoBehaviour
             AnomalyDexManager.Instance.Unlock(AnomalyManager.Instance.CurrentAnomaly);
         }
         
+        bool wasIntroRound = (currentStage == 0);
+
         currentStage++;
+
+        if (!wasIntroRound)
+        {
         successCount++;
+        }
 
         stageUI.UpdateStage(currentStage);
         stageUI.UpdateSuccess(successCount);

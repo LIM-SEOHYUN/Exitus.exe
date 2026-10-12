@@ -30,6 +30,14 @@ public class AnomalyManager : MonoBehaviour
     // 스테이지 시작 시 StageController가 호출해야 함
     public void DecideStageAnomaly()
     {
+        if (CurrentAnomaly != null)
+        {
+            if (CurrentAnomaly is MonsterChaseAnomaly monsterAnomaly)
+            {
+                monsterAnomaly.ClearMonster();
+            }
+            CurrentAnomaly = null;
+        }
         List<AnomalyBase> availablePool = anomalyPool.FindAll(a => !usedAnomalyIds.Contains(a.AnomalyId));
 
         if (availablePool.Count == 0 || Random.value > anomalyChance)

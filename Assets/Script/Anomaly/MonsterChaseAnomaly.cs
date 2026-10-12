@@ -5,7 +5,6 @@ public class MonsterChaseAnomaly : AnomalyBase
     private MonsterChaseAnomalyData MyData => data as MonsterChaseAnomalyData;
     private GameObject spawnedMonster;
 
-    // 씬에서 직접 연결할 Transform (스폰 위치)
     public Transform spawnPoint;
 
     public override void Activate()
@@ -29,9 +28,6 @@ public class MonsterChaseAnomaly : AnomalyBase
         CreatureAI ai = spawnedMonster.GetComponent<CreatureAI>();
         ai.moveSpeed = MyData.chaseSpeed;
 
-        // 컷씬 UI 주입 (씬에 있는 오브젝트 연결)
-        //ai.cutsceneUI = GameObject.Find("CreatureTriggerCutScene");
-
         // 한 프레임 기다렸다가 Activate 실행 (Start()가 먼저 돌도록 보장)
         StartCoroutine(ActivateAfterFrame(ai));
     }
@@ -47,5 +43,17 @@ public class MonsterChaseAnomaly : AnomalyBase
     {
         // 몬스터가 아직 살아있으면 스테이지 클리어 보류
         return spawnedMonster == null;
+    }
+
+    public void ClearMonster()
+    {
+        if (spawnedMonster != null)
+        {
+            CreatureAI ai = spawnedMonster.GetComponent<CreatureAI>();
+            if (ai != null)
+            {
+                ai.DeactivateMonster(); // 크리처 숨기기 실행
+            }
+        }
     }
 }

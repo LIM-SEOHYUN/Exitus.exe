@@ -15,6 +15,7 @@ MonoBehaviour:
   anomalyId: monster_chase_01
   displayName: ???
   description: "\uB9C8\uC8FC\uCE58\uBA74 \uB4A4\uB3C4 \uB3CC\uC544\uBCF4\uC9C0 \uB9D0\uACE0
-    \uB3C4\uB9DD\uCE60 \uAC83. \uB9CC\uC57D \uADF8\uC5D0\uAC8C \uC7A1\uD788\uBA74..."
+    \uB3C4\uB9DD\uCE60 \uAC83. \uADF8\uB294 \uBAA8\uB4E0 \uBB3C\uB9AC\uBC95\uCE59\uC744
+    \uAC70\uC2A4\uB974\uB294 \uB4EF \uD558\uB2E4. \uB9CC\uC57D \uC7A1\uD788\uBA74..."
   monsterPrefab: {fileID: 2849743991327999430, guid: c6efa2f8dac520a4bb8baad17e741641, type: 3}
   chaseSpeed: 10.1

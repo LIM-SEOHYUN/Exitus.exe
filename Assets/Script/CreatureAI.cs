@@ -134,6 +134,20 @@ public class CreatureAI : MonoBehaviour
         }
 
         GameManager.Instance.Fail();
-        Destroy(gameObject);
+
+        // Destroy(gameObject) 대신 숨기기 실행
+        DeactivateMonster();
+    }
+
+    public void DeactivateMonster()
+    {
+        isActive = false;
+        isAttacking = false;
+
+        if (animator != null) animator.SetBool("isWalking", false);
+        if (myCollider != null) myCollider.enabled = false;
+
+        // 파괴하지 않고 숨김 처리 (재사용 가능)
+        gameObject.SetActive(false);
     }
 }

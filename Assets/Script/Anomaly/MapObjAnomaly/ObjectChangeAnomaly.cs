@@ -26,4 +26,16 @@ public class ObjectChangeAnomaly : AnomalyBase //AnomalyBase 상속
             }
         }
     }
+    public override void Deactivate()
+    {
+        if (MyData == null) return;
+
+        MapObject[] all = FindObjectsOfType<MapObject>(true);   // true = 비활성 오브젝트도 포함
+
+        foreach (MapObjectState state in MyData.objectStates)
+        {
+            MapObject target = System.Array.Find(all, o => o.ObjectId == state.objectId);
+            if (target != null) target.ResetToOriginal();
+        }
+    }
 }
